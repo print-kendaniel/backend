@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"D:/pw-tool\")",
+      "Bash(npm init *)",
+      "Bash(cp \"D:/portfolio/.tmp-check/check.js\" \"D:/pw-tool/check.js\")",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check.js)",
+      "Bash(git commit -m ' *)",
+      "Bash(curl -sI --max-time 8 https://fonts.gstatic.com/s/jetbrainsmono/v18/tDba2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2)",
+      "Bash(curl -s --max-time 10 \"https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap\" -A \"Mozilla/5.0\")",
+      "Bash(curl -sL --max-time 15 -o \"D:/portfolio/public/fonts/SpaceGrotesk-Bold.ttf\" \"https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf\")",
+      "Bash(timeout 30 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 1; done')",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check2.js)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check3.js)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check4.js)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check5.js)",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('react-icons/fa'\\)\\).filter\\(k=>['FaBrain','FaMicrochip','FaCloud','FaRobot','FaShieldAlt','FaPiggyBank','FaHeadphones','FaSeedling','FaCertificate','FaChartLine','FaHardHat','FaEnvelope','FaGithub','FaPhone','FaLinkedin','FaTimes','FaExternalLinkAlt'].includes\\(k\\)\\)\\)\")",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" npm i playwright)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check6.js)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check7.js)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=D:/pw-browsers node -e ' *)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=\"D:/pw-browsers\" node check8.js)",
+      "Bash(time curl -s --max-time 35 -o /tmp/page.html -w \"%{http_code} %{time_total}\\\\n\" http://localhost:3000)",
+      "Bash(mkdir -p \"D:/pw-profile\" 2>&1; echo ok)"
+    ],
+    "additionalDirectories": [
+      "D:\\"
+    ]
+  }
+}
