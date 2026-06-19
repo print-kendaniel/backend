@@ -1,20 +1,18 @@
 import io
+import os
+import shutil
 import cv2
 import numpy as np
 from PIL import Image
-from typing import Optional
-import easyocr
+import pytesseract
 
-# Initialize EasyOCR reader (English)
-_reader: Optional[easyocr.Reader] = None
-
-
-def get_reader() -> easyocr.Reader:
-    global _reader
-    if _reader is None:
-        _reader = easyocr.Reader(["en"], gpu=False)
-    return _reader
-
+# On Linux (production), `apt-get install tesseract-ocr` puts the binary on
+# PATH already. On Windows dev machines it isn't, so point at the default
+# installer location if we can't find it on PATH.
+if shutil.which("tesseract") is None:
+    _default_win_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.path.exists(_default_win_path):
+        pytesseract.pytesseract.tesseract_cmd = _default_win_path
 
 PHISHING_PATTERNS = [
     "enter your password",
@@ -51,13 +49,17 @@ PHISHING_PATTERNS = [
 
 
 def extract_text_from_image(image_bytes: bytes) -> list[str]:
-    """Extract text from image using EasyOCR."""
+    """Extract text from image using Tesseract OCR.
+
+    Tesseract instead of EasyOCR deliberately: EasyOCR pulls in torch, which
+    pushes memory past Render's free-tier 512MB and crashes the process.
+    Tesseract has no deep-learning runtime, so it fits comfortably.
+    """
     try:
-        reader = get_reader()
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        results = reader.readtext(img, detail=0)
-        return [str(r).strip() for r in results if str(r).strip()]
+        text = pytesseract.image_to_string(img)
+        return [line.strip() for line in text.splitlines() if line.strip()]
     except Exception as e:
         raise RuntimeError(f"OCR failed: {str(e)}")
 

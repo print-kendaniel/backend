@@ -2,7 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# System deps for OpenCV, pyzbar
+# System deps for OpenCV, pyzbar, and Tesseract OCR (used instead of EasyOCR
+# specifically because it has no deep-learning runtime, so it fits Render's
+# free-tier 512MB RAM where torch/easyocr did not).
 RUN apt-get update && apt-get install -y \
     libzbar0 \
     libzbar-dev \
@@ -11,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libgl1 \
+    tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
