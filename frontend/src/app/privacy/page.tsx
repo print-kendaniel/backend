@@ -107,8 +107,8 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-bold text-white mb-3">Contact</h2>
             <p>
               Questions about this policy or your data can be sent to{" "}
-              <a href="mailto:privacy@trustlinkai.app" className="text-primary hover:underline">
-                privacy@trustlinkai.app
+              <a href="mailto:kd.llamanzares@gmail.com" className="text-primary hover:underline">
+                kd.llamanzares@gmail.com
               </a>
               .
             </p>
