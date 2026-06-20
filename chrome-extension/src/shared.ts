@@ -37,6 +37,9 @@ export interface Settings {
   autoScan: boolean;
   notifications: boolean;
   language: Lang;
+  // Optional personal Gemini API key (from Google AI Studio). When set, scans
+  // use this key's own daily quota instead of sharing the app's limited pool.
+  geminiApiKey: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -45,7 +48,17 @@ export const DEFAULT_SETTINGS: Settings = {
   autoScan: false,
   notifications: true,
   language: "en",
+  geminiApiKey: "",
 };
+
+export async function buildScanHeaders(extra?: Record<string, string>): Promise<Record<string, string>> {
+  const settings = await getSettings();
+  const headers: Record<string, string> = { ...extra };
+  if (settings.geminiApiKey.trim()) {
+    headers["X-Gemini-Key"] = settings.geminiApiKey.trim();
+  }
+  return headers;
+}
 
 const ALLOWLIST_KEY = "trustlink_allowlist";
 const HISTORY_KEY = "trustlink_history";

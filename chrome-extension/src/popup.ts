@@ -4,6 +4,7 @@ import {
   removeFromAllowlist,
   isAllowlisted,
   addToHistory,
+  buildScanHeaders,
   getHistory,
   getSettings,
   saveSettings,
@@ -43,6 +44,7 @@ const settingsPanel = document.getElementById("settingsPanel") as HTMLDivElement
 const autoScanToggle = document.getElementById("autoScanToggle") as HTMLInputElement;
 const notificationsToggle = document.getElementById("notificationsToggle") as HTMLInputElement;
 const languageSelect = document.getElementById("languageSelect") as HTMLSelectElement;
+const geminiKeyInput = document.getElementById("geminiKeyInput") as HTMLInputElement;
 
 const RISK_CONFIG = {
   safe: { emoji: "🟢", label: "SAFE", color: "#00C853" },
@@ -153,12 +155,12 @@ async function scanUrl(url: string) {
     const message = err instanceof Error ? err.message : String(err);
     const looksLikeQuota = /429|quota/i.test(message);
     resultSummary.textContent = looksLikeQuota
-      ? "Gemini API daily quota exceeded. Try again later, or use a different API key with a higher quota."
+      ? "The shared daily AI quota is used up for now."
       : `Scan failed: ${message}`;
     resultReasons.innerHTML = "";
     resultRecommendation.className = "result-recommendation suspicious";
     resultRecommendation.textContent = looksLikeQuota
-      ? "This is a Gemini API limit, not a problem with the extension or backend connection."
+      ? "Add your own free Gemini API key in Settings to get your own daily quota instead of sharing this one."
       : `If this persists, make sure the backend is running at ${API_BASE}.`;
   }
 }
@@ -190,6 +192,7 @@ async function captureAndScanScreenshot() {
         const endpoint = isFacebookUrl(currentTabUrl) ? "scan-social-screenshot" : "scan-image";
         const response = await fetch(`${API_BASE}/${endpoint}`, {
           method: "POST",
+          headers: await buildScanHeaders(),
           body: formData,
         });
 
@@ -217,6 +220,7 @@ async function scanUploadedFile(file: File) {
 
     const response = await fetch(`${API_BASE}/${endpoint}`, {
       method: "POST",
+      headers: await buildScanHeaders(),
       body: formData,
     });
 
@@ -245,6 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   autoScanToggle.checked = settings.autoScan;
   notificationsToggle.checked = settings.notifications;
   languageSelect.value = settings.language;
+  geminiKeyInput.value = settings.geminiApiKey;
 
   // Load cached result for the current tab
   chrome.storage.local.get([`scan_${currentTabUrl}`], (result) => {
@@ -294,5 +299,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   languageSelect.addEventListener("change", () => {
     saveSettings({ language: languageSelect.value as "en" | "tl" });
+  });
+  geminiKeyInput.addEventListener("change", () => {
+    saveSettings({ geminiApiKey: geminiKeyInput.value.trim() });
   });
 });

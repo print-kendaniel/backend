@@ -7,6 +7,7 @@ import URLScanner from "@/components/scan/URLScanner";
 import ScreenshotAnalyzer from "@/components/scan/ScreenshotAnalyzer";
 import QRScanner from "@/components/scan/QRScanner";
 import SocialProfileScanner from "@/components/scan/SocialProfileScanner";
+import ApiKeySettings from "@/components/scan/ApiKeySettings";
 import Navbar from "@/components/landing/Navbar";
 import ReportWebsite from "@/components/dashboard/ReportWebsite";
 
@@ -106,6 +107,8 @@ export default function ScanPage() {
           All scans are processed securely. Results are powered by Gemini AI and multi-layer threat
           intelligence.
         </motion.p>
+
+        <ApiKeySettings />
       </main>
     </div>
   );

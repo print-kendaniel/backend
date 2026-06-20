@@ -2,13 +2,18 @@ import os
 import io
 import json
 import re
-import google.generativeai as genai
+import base64
+from typing import Optional
+
+import httpx
 from PIL import Image
 
-# transport="rest" avoids gRPC hangs on networks that block/throttle the gRPC port
-genai.configure(api_key=os.getenv("GEMINI_API_KEY", ""), transport="rest")
-
-_model = genai.GenerativeModel("gemini-2.5-flash")
+# Talking to the REST endpoint directly (rather than the google-generativeai SDK)
+# means each call can carry its own API key with no shared global client state —
+# required so concurrent requests from different users' own keys can't race or
+# leak into each other.
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+_DEFAULT_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 ANALYSIS_PROMPT_TEMPLATE = """
 You are TrustMeBro AI, an expert cybersecurity analyst specializing in phishing detection,
@@ -102,20 +107,72 @@ def _parse_gemini_text(text: str) -> dict:
     }
 
 
-def _generate(parts: list) -> dict:
+def _build_part(item) -> dict:
+    if isinstance(item, str):
+        return {"text": item}
+    if isinstance(item, Image.Image):
+        buf = io.BytesIO()
+        item.save(buf, format="PNG")
+        return {
+            "inline_data": {
+                "mime_type": "image/png",
+                "data": base64.b64encode(buf.getvalue()).decode("ascii"),
+            }
+        }
+    raise TypeError(f"Unsupported Gemini part type: {type(item)}")
+
+
+async def _generate(parts: list, api_key: Optional[str] = None) -> dict:
+    key = (api_key or "").strip() or _DEFAULT_API_KEY
+    if not key:
+        raise RuntimeError("Gemini API error: no API key configured")
+
+    body = {
+        "contents": [{"parts": [_build_part(p) for p in parts]}],
+        "generationConfig": {
+            "temperature": 0.1,
+            # gemini-2.5-flash spends part of this budget on internal "thinking"
+            # tokens before writing the visible JSON answer, so a small budget
+            # here gets exhausted before any output appears.
+            "maxOutputTokens": 4096,
+        },
+    }
+
     try:
-        response = _model.generate_content(
-            parts,
-            generation_config=genai.GenerationConfig(
-                temperature=0.1,
-                # gemini-2.5-flash spends part of this budget on internal
-                # "thinking" tokens before writing the visible JSON answer,
-                # so a small budget here gets exhausted before any output appears.
-                max_output_tokens=4096,
-            ),
-        )
-        return _parse_gemini_text(response.text)
-    except json.JSONDecodeError:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                GEMINI_API_URL,
+                params={"key": key},
+                json=body,
+            )
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Gemini API error: {str(e)}")
+
+    if response.status_code == 429:
+        raise RuntimeError("Gemini API error: 429 quota exceeded")
+    if response.status_code != 200:
+        detail = response.text[:300]
+        raise RuntimeError(f"Gemini API error: {response.status_code} {detail}")
+
+    data = response.json()
+    candidates = data.get("candidates") or []
+    if not candidates:
+        block_reason = data.get("promptFeedback", {}).get("blockReason")
+        return {
+            "risk_level": "suspicious",
+            "risk_score": 50,
+            "confidence": 30,
+            "summary": "AI analysis could not be completed (no response generated). Treat with caution.",
+            "reasons": [f"Gemini returned no candidates{f' (blocked: {block_reason})' if block_reason else ''}"],
+            "recommendation": "Could not fully analyze. Avoid sharing personal information.",
+        }
+
+    text_parts = candidates[0].get("content", {}).get("parts", [])
+    text = "".join(p.get("text", "") for p in text_parts)
+
+    try:
+        return _parse_gemini_text(text)
+    except (json.JSONDecodeError, ValueError):
         return {
             "risk_level": "suspicious",
             "risk_score": 50,
@@ -124,23 +181,23 @@ def _generate(parts: list) -> dict:
             "reasons": ["AI analysis returned unexpected format"],
             "recommendation": "Could not fully analyze. Avoid sharing personal information.",
         }
-    except Exception as e:
-        raise RuntimeError(f"Gemini API error: {str(e)}")
 
 
-async def analyze_with_gemini(context: str) -> dict:
+async def analyze_with_gemini(context: str, api_key: Optional[str] = None) -> dict:
     """Call Gemini API and parse the structured phishing/threat report."""
     prompt = ANALYSIS_PROMPT_TEMPLATE.format(context=context)
-    return _generate([prompt])
+    return await _generate([prompt], api_key=api_key)
 
 
-async def analyze_social_profile_with_gemini(context: str) -> dict:
+async def analyze_social_profile_with_gemini(context: str, api_key: Optional[str] = None) -> dict:
     """Text-only Facebook profile/page assessment (URL pattern + best-effort metadata)."""
     prompt = SOCIAL_PROFILE_PROMPT_TEMPLATE.format(context=context)
-    return _generate([prompt])
+    return await _generate([prompt], api_key=api_key)
 
 
-async def analyze_social_profile_screenshot_with_gemini(image_bytes: bytes, context: str) -> dict:
+async def analyze_social_profile_screenshot_with_gemini(
+    image_bytes: bytes, context: str, api_key: Optional[str] = None
+) -> dict:
     """Vision-based Facebook profile/page assessment from an actual screenshot.
 
     Unlike the phishing-screenshot flow (OCR text only), this sends the image
@@ -149,4 +206,4 @@ async def analyze_social_profile_screenshot_with_gemini(image_bytes: bytes, cont
     """
     prompt = SOCIAL_PROFILE_PROMPT_TEMPLATE.format(context=context)
     image = Image.open(io.BytesIO(image_bytes))
-    return _generate([prompt, image])
+    return await _generate([prompt, image], api_key=api_key)

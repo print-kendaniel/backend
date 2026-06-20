@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Form, Header, HTTPException, BackgroundTasks
 from typing import Optional
 import asyncio
 
@@ -12,13 +12,22 @@ from app.services.gemini_service import (
     analyze_social_profile_with_gemini,
     analyze_social_profile_screenshot_with_gemini,
 )
+from app.services.verdict_cache import get_cached_verdict, store_verdict
 from app.services.firebase_service import save_scan_result
 
 router = APIRouter()
 
+# Users can supply their own free Gemini API key (Settings panel) so their
+# scans draw from their own daily quota instead of the shared server key.
+GeminiKeyHeader = Header(None, alias="X-Gemini-Key")
+
 
 @router.post("/scan-url", response_model=ThreatReport)
-async def scan_url(request: URLScanRequest, background_tasks: BackgroundTasks):
+async def scan_url(
+    request: URLScanRequest,
+    background_tasks: BackgroundTasks,
+    x_gemini_key: Optional[str] = GeminiKeyHeader,
+):
     """Analyze a URL for phishing and malicious content."""
     url = request.url.strip()
     if not url:
@@ -28,12 +37,17 @@ async def scan_url(request: URLScanRequest, background_tasks: BackgroundTasks):
     if not url.startswith(("http://", "https://")):
         url = f"https://{url}"
 
+    cached = get_cached_verdict("url", url)
+    if cached:
+        return ThreatReport(**cached, url=url, scan_type="url")
+
     try:
         # 1. Technical URL analysis
         url_data = await analyze_url(url)
 
         # 2. Gemini AI threat assessment
-        ai_result = await analyze_with_gemini(url_data["context"])
+        ai_result = await analyze_with_gemini(url_data["context"], api_key=x_gemini_key)
+        store_verdict("url", url, ai_result)
 
         report = ThreatReport(
             **ai_result,
@@ -61,6 +75,7 @@ async def scan_image(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_id: Optional[str] = Form(None),
+    x_gemini_key: Optional[str] = GeminiKeyHeader,
 ):
     """Analyze an uploaded screenshot for phishing and scam indicators."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -75,7 +90,7 @@ async def scan_image(
         image_data = await analyze_image(image_bytes)
 
         # 2. Gemini AI analysis
-        ai_result = await analyze_with_gemini(image_data["context"])
+        ai_result = await analyze_with_gemini(image_data["context"], api_key=x_gemini_key)
 
         report = ThreatReport(
             **ai_result,
@@ -102,6 +117,7 @@ async def scan_qr(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_id: Optional[str] = Form(None),
+    x_gemini_key: Optional[str] = GeminiKeyHeader,
 ):
     """Decode a QR code and analyze the contained URL."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -123,7 +139,7 @@ async def scan_qr(
             combined_context = f"{qr_data['context']}\n\nAnalyze this QR code content for malicious intent, scam links, or harmful instructions."
 
         # 3. Gemini AI analysis
-        ai_result = await analyze_with_gemini(combined_context)
+        ai_result = await analyze_with_gemini(combined_context, api_key=x_gemini_key)
 
         report = ThreatReport(
             **ai_result,
@@ -148,7 +164,11 @@ async def scan_qr(
 
 
 @router.post("/scan-social-url", response_model=ThreatReport)
-async def scan_social_url(request: SocialScanRequest, background_tasks: BackgroundTasks):
+async def scan_social_url(
+    request: SocialScanRequest,
+    background_tasks: BackgroundTasks,
+    x_gemini_key: Optional[str] = GeminiKeyHeader,
+):
     """Best-effort check of a Facebook profile/page URL for signs of being fake/cloned.
 
     Facebook blocks most unauthenticated access to profile content, so this can
@@ -163,9 +183,14 @@ async def scan_social_url(request: SocialScanRequest, background_tasks: Backgrou
     if not is_facebook_url(url):
         raise HTTPException(status_code=400, detail="This endpoint only supports Facebook profile/page URLs")
 
+    cached = get_cached_verdict("social", url)
+    if cached:
+        return ThreatReport(**cached, url=url, scan_type="social")
+
     try:
         social_data = await analyze_facebook_url(url)
-        ai_result = await analyze_social_profile_with_gemini(social_data["context"])
+        ai_result = await analyze_social_profile_with_gemini(social_data["context"], api_key=x_gemini_key)
+        store_verdict("social", url, ai_result)
 
         report = ThreatReport(
             **ai_result,
@@ -192,6 +217,7 @@ async def scan_social_screenshot(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_id: Optional[str] = Form(None),
+    x_gemini_key: Optional[str] = GeminiKeyHeader,
 ):
     """Check a screenshot of a Facebook profile/page for signs of being fake/cloned.
 
@@ -221,7 +247,7 @@ verification badge, overall page layout, and anything else visible that text
 alone wouldn't capture.
 """
 
-        ai_result = await analyze_social_profile_screenshot_with_gemini(image_bytes, context)
+        ai_result = await analyze_social_profile_screenshot_with_gemini(image_bytes, context, api_key=x_gemini_key)
 
         report = ThreatReport(
             **ai_result,

@@ -1,6 +1,7 @@
 // Service Worker — Manifest V3 background script
 import {
   ThreatReport,
+  buildScanHeaders,
   extractDomain,
   extractErrorDetail,
   getSettings,
@@ -65,7 +66,7 @@ async function performUrlScan(
 ): Promise<ThreatReport> {
   const response = await fetch(`${API_BASE}/${endpoint}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: await buildScanHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ url }),
   });
   if (!response.ok) throw new Error(await extractErrorDetail(response));
@@ -106,7 +107,11 @@ async function handleScanImage(imageUrl: string, pageUrl?: string): Promise<void
   const tryEndpoint = async (endpoint: string): Promise<ThreatReport> => {
     const formData = new FormData();
     formData.append("file", blob, "image.png");
-    const res = await fetch(`${API_BASE}/${endpoint}`, { method: "POST", body: formData });
+    const res = await fetch(`${API_BASE}/${endpoint}`, {
+      method: "POST",
+      headers: await buildScanHeaders(),
+      body: formData,
+    });
     if (!res.ok) throw new Error(await extractErrorDetail(res));
     return res.json();
   };

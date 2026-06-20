@@ -12,8 +12,24 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  // Optional personal Gemini key (Settings on the scan page). When set, scans
+  // draw from this key's own daily quota instead of the shared server pool.
+  const geminiKey = typeof window !== "undefined" ? localStorage.getItem("gemini_api_key") : null;
+  if (geminiKey) config.headers["X-Gemini-Key"] = geminiKey;
+
   return config;
 });
+
+export function getGeminiKey(): string {
+  return typeof window !== "undefined" ? localStorage.getItem("gemini_api_key") || "" : "";
+}
+
+export function setGeminiKey(key: string): void {
+  if (typeof window === "undefined") return;
+  if (key.trim()) localStorage.setItem("gemini_api_key", key.trim());
+  else localStorage.removeItem("gemini_api_key");
+}
 
 export async function scanUrl(url: string, userId?: string): Promise<ThreatReport> {
   const { data } = await api.post<ThreatReport>("/scan-url", { url, user_id: userId });
