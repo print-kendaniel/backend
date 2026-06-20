@@ -4,20 +4,20 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
-  title: "TrustLink AI — AI-Powered Cybersecurity Scanner",
+  title: "TrustMeBro AI — AI-Powered Cybersecurity Scanner",
   description:
-    "Detect phishing websites, malicious URLs, scam pages, and fake login portals with AI-powered analysis. Stay protected online with TrustLink AI.",
+    "Detect phishing websites, malicious URLs, scam pages, and fake login portals with AI-powered analysis. Stay protected online with TrustMeBro AI.",
   keywords: ["phishing detector", "URL scanner", "cybersecurity", "AI security", "malware detection"],
-  authors: [{ name: "TrustLink AI" }],
+  authors: [{ name: "TrustMeBro AI" }],
   openGraph: {
-    title: "TrustLink AI — AI-Powered Cybersecurity Scanner",
+    title: "TrustMeBro AI — AI-Powered Cybersecurity Scanner",
     description: "Detect phishing websites and malicious URLs with AI",
     type: "website",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrustLink AI",
+    title: "TrustMeBro AI",
     description: "AI-powered cybersecurity scanner",
   },
 };

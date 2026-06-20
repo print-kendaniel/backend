@@ -26,7 +26,7 @@ export default function ThreatReport({ report, url }: Props) {
 
   const copyReport = () => {
     const text = [
-      `TrustLink AI Threat Report`,
+      `TrustMeBro AI Threat Report`,
       `URL: ${url || "N/A"}`,
       `Risk Level: ${getRiskLabel(report.risk_level)} (${report.risk_score}/100)`,
       `Confidence: ${report.confidence}%`,

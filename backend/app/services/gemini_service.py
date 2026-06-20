@@ -11,7 +11,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY", ""), transport="rest")
 _model = genai.GenerativeModel("gemini-2.5-flash")
 
 ANALYSIS_PROMPT_TEMPLATE = """
-You are TrustLink AI, an expert cybersecurity analyst specializing in phishing detection,
+You are TrustMeBro AI, an expert cybersecurity analyst specializing in phishing detection,
 scam identification, and online threat analysis, with deep expertise in Philippine banking
 and payment scams (GCash, Maya, BDO, BPI, Metrobank, etc).
 
@@ -44,7 +44,7 @@ Focus on:
 """
 
 SOCIAL_PROFILE_PROMPT_TEMPLATE = """
-You are TrustLink AI, an expert in detecting fake, cloned, and scam social media
+You are TrustMeBro AI, an expert in detecting fake, cloned, and scam social media
 profiles and pages, with deep expertise in Filipino social-media scam patterns
 (fake sellers, romance scams, fake investment/crypto pages, impersonated
 celebrities/brands, fake raffles and giveaways).

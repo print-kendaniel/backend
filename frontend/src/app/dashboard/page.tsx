@@ -73,7 +73,7 @@ export default function DashboardPage() {
             <div className="w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
               <Shield className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-bold text-sm">TrustLink <span className="text-primary">AI</span></span>
+            <span className="font-bold text-sm">TrustMeBro <span className="text-primary">AI</span></span>
           </Link>
 
           <div className="flex items-center gap-3">

@@ -1,4 +1,4 @@
-# TrustLink AI — AI-Powered Cybersecurity Platform
+# TrustMeBro AI — AI-Powered Cybersecurity Platform
 
 > Detect phishing websites, malicious URLs, scam pages, fake login portals, and dangerous QR codes using Gemini AI, OCR, and computer vision.
 
@@ -27,7 +27,7 @@
 
 ## Overview
 
-TrustLink AI is a production-ready cybersecurity SaaS platform that uses Google Gemini AI to analyze URLs, screenshots, and QR codes for phishing, scam, and malware indicators — with special focus on Philippine banking brand impersonation (GCash, Maya, BDO, BPI).
+TrustMeBro AI is a production-ready cybersecurity SaaS platform that uses Google Gemini AI to analyze URLs, screenshots, and QR codes for phishing, scam, and malware indicators — with special focus on Philippine banking brand impersonation (GCash, Maya, BDO, BPI).
 
 ---
 

@@ -13,7 +13,7 @@ export default function Footer() {
                 <Shield className="w-4 h-4 text-primary" />
               </div>
               <span className="font-bold text-lg">
-                <span className="text-white">TrustLink</span>
+                <span className="text-white">TrustMeBro</span>
                 <span className="text-primary"> AI</span>
               </span>
             </div>
@@ -69,7 +69,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-text-muted text-xs">
-            © {new Date().getFullYear()} TrustLink AI. All rights reserved.
+            © {new Date().getFullYear()} TrustMeBro AI. All rights reserved.
           </p>
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <div className="w-2 h-2 rounded-full bg-safe animate-pulse" />

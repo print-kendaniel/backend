@@ -6,12 +6,12 @@ import { Plus, Minus } from "lucide-react";
 
 const faqs = [
   {
-    q: "Is TrustLink AI free to use?",
+    q: "Is TrustMeBro AI free to use?",
     a: "Yes! The core URL scanning, screenshot analysis, and QR code scanning features are completely free. Create a free account to unlock scan history, dashboard analytics, and saved reports.",
   },
   {
     q: "How accurate is the phishing detection?",
-    a: "TrustLink AI achieves 99.7% accuracy in detecting phishing sites by combining domain reputation data, SSL analysis, keyword pattern matching, and Gemini AI's language model reasoning — reducing false positives to under 0.3%.",
+    a: "TrustMeBro AI achieves 99.7% accuracy in detecting phishing sites by combining domain reputation data, SSL analysis, keyword pattern matching, and Gemini AI's language model reasoning — reducing false positives to under 0.3%.",
   },
   {
     q: "Can it detect GCash, Maya, BDO, BPI fake sites?",
@@ -34,7 +34,7 @@ const faqs = [
     a: "Yes. Use the Report Website feature in your dashboard or on the scan page. Reports are reviewed by our system and flagged in the shared threat intelligence database to protect all users.",
   },
   {
-    q: "What technologies power TrustLink AI?",
+    q: "What technologies power TrustMeBro AI?",
     a: "Frontend: Next.js 14, TypeScript, Tailwind CSS, Framer Motion. Backend: FastAPI (Python). AI: Google Gemini API. OCR: EasyOCR. QR: pyzbar + OpenCV. Auth & DB: Firebase.",
   },
 ];
@@ -62,7 +62,7 @@ export default function FAQ() {
             transition={{ delay: 0.1 }}
             className="text-text-secondary text-lg"
           >
-            Everything you need to know about TrustLink AI.
+            Everything you need to know about TrustMeBro AI.
           </motion.p>
         </div>
 

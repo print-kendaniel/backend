@@ -136,7 +136,7 @@ export default function Hero() {
                 <div className="w-3 h-3 rounded-full bg-warning/60" />
                 <div className="w-3 h-3 rounded-full bg-safe/60" />
               </div>
-              <span className="text-xs text-text-muted font-mono">TrustLink AI Scanner</span>
+              <span className="text-xs text-text-muted font-mono">TrustMeBro AI Scanner</span>
             </div>
 
             <div className="flex items-center gap-3 bg-surface-2 rounded-xl px-4 py-3 border border-border mb-4">

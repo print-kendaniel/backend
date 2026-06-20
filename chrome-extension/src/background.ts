@@ -23,7 +23,7 @@ function setupContextMenus() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: "trustlink-scan-link",
-      title: "Scan this link with TrustLink AI",
+      title: "Scan this link with TrustMeBro AI",
       contexts: ["link"],
     });
     chrome.contextMenus.create({
@@ -53,7 +53,7 @@ function notifyThreat(domain: string, data: ThreatReport) {
   chrome.notifications.create({
     type: "basic",
     iconUrl: "icons/icon128.png",
-    title: titleByLevel[data.risk_level] || "TrustLink AI Alert",
+    title: titleByLevel[data.risk_level] || "TrustMeBro AI Alert",
     message: `${domain} — risk score ${data.risk_score}/100. ${data.summary}`,
   });
 }

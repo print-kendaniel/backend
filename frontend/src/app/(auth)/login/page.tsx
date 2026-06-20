@@ -65,7 +65,7 @@ export default function LoginPage() {
             <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center">
               <Shield className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-bold text-xl">TrustLink <span className="text-primary">AI</span></span>
+            <span className="font-bold text-xl">TrustMeBro <span className="text-primary">AI</span></span>
           </Link>
           <h1 className="text-2xl font-black text-white mb-2">Welcome back</h1>
           <p className="text-text-secondary text-sm">Sign in to your account</p>

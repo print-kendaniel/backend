@@ -48,7 +48,7 @@ const features = [
     icon: FileText,
     title: "Report Website",
     description:
-      "Found a scam site? Report it directly to our database. Community-driven threat intelligence helps protect all TrustLink users.",
+      "Found a scam site? Report it directly to our database. Community-driven threat intelligence helps protect all TrustMeBro users.",
     color: "#00E5FF",
     tags: ["Community", "Reporting", "Intelligence"],
   },

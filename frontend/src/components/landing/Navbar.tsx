@@ -46,7 +46,7 @@ export default function Navbar() {
               <div className="absolute inset-0 rounded-lg bg-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <span className="font-bold text-lg tracking-tight">
-              <span className="text-white">TrustLink</span>
+              <span className="text-white">TrustMeBro</span>
               <span className="text-primary"> AI</span>
             </span>
           </Link>

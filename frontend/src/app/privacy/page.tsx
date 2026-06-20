@@ -2,7 +2,7 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
 export const metadata = {
-  title: "Privacy Policy — TrustLink AI",
+  title: "Privacy Policy — TrustMeBro AI",
 };
 
 export default function PrivacyPolicyPage() {
@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-bold text-white mb-3">Overview</h2>
             <p>
-              TrustLink AI ("we", "our", "the service") provides phishing and scam detection through
+              TrustMeBro AI ("we", "our", "the service") provides phishing and scam detection through
               a web app, a Chrome extension, and a backend API. This page explains what data we
               process when you use any of these, and why.
             </p>

@@ -88,7 +88,7 @@ export default function ThreatShowcase() {
             className="text-text-secondary text-lg max-w-xl mx-auto"
           >
             Real examples of phishing sites, banking scams, and brand impersonation attempts that
-            TrustLink AI detects and blocks.
+            TrustMeBro AI detects and blocks.
           </motion.p>
         </div>
 

@@ -25,7 +25,7 @@ export default function ChromeExtPreview() {
               <span className="gradient-text">you browse</span>
             </h2>
             <p className="text-text-secondary text-lg mb-8 leading-relaxed">
-              Install the TrustLink AI Chrome extension and get instant threat analysis on any website
+              Install the TrustMeBro AI Chrome extension and get instant threat analysis on any website
               with one click. Scan the current URL, capture screenshots, or upload QR codes — all
               without leaving your browser.
             </p>
@@ -74,7 +74,7 @@ export default function ChromeExtPreview() {
                   <div className="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center">
                     <Shield className="w-3.5 h-3.5 text-primary" />
                   </div>
-                  <span className="font-bold text-sm">TrustLink AI</span>
+                  <span className="font-bold text-sm">TrustMeBro AI</span>
                   <div className="ml-auto flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-safe animate-pulse" />
                     <span className="text-xs text-safe">Active</span>

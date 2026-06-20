@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "TrustLink AI — Cybersecurity Scanner",
+  "name": "TrustMeBro AI — Cybersecurity Scanner",
   "version": "1.0.0",
   "description": "AI-powered phishing & threat detection. Scan URLs, screenshots, and QR codes instantly.",
   "permissions": [

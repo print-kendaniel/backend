@@ -12,7 +12,7 @@ from app.routes.reports import router as reports_router
 from app.routes.history import router as history_router
 
 app = FastAPI(
-    title="TrustLink AI API",
+    title="TrustMeBro AI API",
     description="AI-powered cybersecurity platform for phishing and threat detection",
     version="1.0.0",
     docs_url="/docs",
@@ -42,7 +42,7 @@ app.include_router(history_router, tags=["History"])
 @app.get("/", tags=["Health"])
 async def root():
     return {
-        "service": "TrustLink AI API",
+        "service": "TrustMeBro AI API",
         "version": "1.0.0",
         "status": "operational",
         "docs": "/docs",
