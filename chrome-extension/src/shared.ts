@@ -19,6 +19,17 @@ export interface HistoryEntry extends ThreatReport {
   timestamp: number;
 }
 
+// Threat report text (summary/reasons) comes from the AI's analysis of
+// attacker-influenceable input (page content, OCR text, profile bios), so it
+// must never be inserted into innerHTML unescaped — a crafted page could try
+// to prompt-inject HTML/script into the AI's output to get it rendered here.
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+};
+export function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+}
+
 // FastAPI's HTTPException responses look like {"detail": "..."}. This pulls
 // that out so callers see the real failure reason instead of just "HTTP 500".
 export async function extractErrorDetail(response: Response): Promise<string> {

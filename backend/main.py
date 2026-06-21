@@ -5,18 +5,21 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.routes.scan import router as scan_router
 from app.routes.reports import router as reports_router
 from app.routes.history import router as history_router
 
+# Interactive API docs map out every endpoint/param for free recon — this
+# isn't a public developer API, so they're only useful in development.
+_is_production = os.getenv("APP_ENV", "development") == "production"
+
 app = FastAPI(
     title="TrustMeBro AI API",
     description="AI-powered cybersecurity platform for phishing and threat detection",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url=None if _is_production else "/docs",
+    redoc_url=None if _is_production else "/redoc",
 )
 
 # CORS
@@ -28,7 +31,11 @@ app.add_middleware(
     # origin, which isn't (and can't be, since the id varies per install) listed
     # in ALLOWED_ORIGINS above.
     allow_origin_regex=r"chrome-extension://.*",
-    allow_credentials=True,
+    # Auth is a Bearer token in the Authorization header, never cookies, so
+    # there's no reason to allow credentialed cross-origin requests — leaving
+    # this off limits what a malicious extension matching the regex above
+    # could do even in the worst case.
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )

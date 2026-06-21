@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
+  onIdTokenChanged,
   updateProfile,
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
@@ -38,7 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+    // onIdTokenChanged (not onAuthStateChanged) fires whenever Firebase
+    // silently refreshes the ID token in the background, not just on
+    // sign-in/out — keeps the stored token from going stale mid-session.
+    const unsubscribe = onIdTokenChanged(auth, async (fbUser) => {
       if (fbUser) {
         const token = await fbUser.getIdToken();
         localStorage.setItem("auth_token", token);

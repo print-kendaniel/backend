@@ -32,8 +32,8 @@ export default function DashboardPage() {
     setHistoryLoading(true);
     try {
       const [s, h] = await Promise.all([
-        getDashboardStats(user.uid),
-        getScanHistory(user.uid),
+        getDashboardStats(),
+        getScanHistory(),
       ]);
       setStats(s);
       setHistory(h);

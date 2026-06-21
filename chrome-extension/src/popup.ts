@@ -5,6 +5,7 @@ import {
   isAllowlisted,
   addToHistory,
   buildScanHeaders,
+  escapeHtml,
   getHistory,
   getSettings,
   saveSettings,
@@ -90,7 +91,7 @@ function displayReport(report: ThreatReport) {
       (r) => `
       <div class="reason-item">
         <div class="reason-dot" style="background:${config.color}"></div>
-        <span>${r}</span>
+        <span>${escapeHtml(r)}</span>
       </div>`
     )
     .join("");
@@ -118,7 +119,7 @@ async function renderHistoryList() {
       return `
         <div class="history-item" data-id="${entry.id}">
           <span class="history-dot" style="background:${config.color}"></span>
-          <span class="history-domain">${entry.domain}</span>
+          <span class="history-domain">${escapeHtml(entry.domain)}</span>
           <span class="history-score" style="color:${config.color}">${entry.risk_score}</span>
           <span class="history-time">${timeAgo(entry.timestamp)}</span>
         </div>`;

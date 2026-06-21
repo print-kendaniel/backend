@@ -1,7 +1,7 @@
 // Content script — runs on all pages.
 // Shows a dismissible banner for suspicious/dangerous-but-lower-score sites,
 // and a blocking full-page interstitial for high-confidence dangerous sites.
-import { ThreatReport, addToAllowlist, extractDomain, getSettings, isAllowlisted } from "./shared";
+import { ThreatReport, addToAllowlist, escapeHtml, extractDomain, getSettings, isAllowlisted } from "./shared";
 import { t } from "./i18n";
 
 const DANGER_BLOCK_THRESHOLD = 80;
@@ -46,7 +46,7 @@ function createBanner(report: ThreatReport, lang: "en" | "tl"): HTMLElement {
       <span style="font-size:16px;">⚠️</span>
       <div>
         <span style="color:${accent};font-weight:700;">${title}</span>
-        <span style="color:${accent}CC;font-size:11px;display:block;margin-top:1px;">${report.summary.slice(0, 100)}${report.summary.length > 100 ? "..." : ""}</span>
+        <span style="color:${accent}CC;font-size:11px;display:block;margin-top:1px;">${escapeHtml(report.summary.slice(0, 100))}${report.summary.length > 100 ? "..." : ""}</span>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -102,7 +102,7 @@ function createInterstitial(report: ThreatReport, lang: "en" | "tl"): HTMLElemen
       <div style="font-size:48px;margin-bottom:16px;">🛑</div>
       <div style="color:#FF4D4F;font-size:22px;font-weight:800;margin-bottom:12px;">${strings.interstitialTitle}</div>
       <div style="color:#C0C0C0;font-size:14px;line-height:1.6;margin-bottom:8px;">${strings.interstitialBody}</div>
-      <div style="color:#A0A0A0;font-size:13px;line-height:1.6;margin-bottom:8px;">${report.summary}</div>
+      <div style="color:#A0A0A0;font-size:13px;line-height:1.6;margin-bottom:8px;">${escapeHtml(report.summary)}</div>
       <div style="color:#FF8080;font-size:13px;font-weight:700;margin-bottom:24px;">Risk score: ${report.risk_score}/100</div>
       <div style="display:flex;flex-direction:column;gap:10px;">
         <button id="trustlink-goback" style="

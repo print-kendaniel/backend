@@ -1,10 +1,10 @@
-from fastapi import APIRouter, UploadFile, File, Form, Header, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File, Header, HTTPException, BackgroundTasks
 from typing import Optional
 import asyncio
 
 from app.models.schemas import ThreatReport, URLScanRequest, SocialScanRequest
 from app.services.url_analyzer import analyze_url
-from app.services.image_analyzer import analyze_image, extract_text_from_image
+from app.services.image_analyzer import analyze_image, extract_text_from_image, validate_image_bytes
 from app.services.qr_processor import process_qr
 from app.services.social_analyzer import analyze_facebook_url, is_facebook_url
 from app.services.gemini_service import (
@@ -14,6 +14,8 @@ from app.services.gemini_service import (
 )
 from app.services.verdict_cache import get_cached_verdict, store_verdict
 from app.services.firebase_service import save_scan_result
+from app.services.auth import get_optional_uid
+from app.services.rate_limiter import rate_limit_scan
 
 router = APIRouter()
 
@@ -27,6 +29,8 @@ async def scan_url(
     request: URLScanRequest,
     background_tasks: BackgroundTasks,
     x_gemini_key: Optional[str] = GeminiKeyHeader,
+    uid: Optional[str] = Depends(get_optional_uid),
+    _rl: None = Depends(rate_limit_scan),
 ):
     """Analyze a URL for phishing and malicious content."""
     url = request.url.strip()
@@ -55,11 +59,13 @@ async def scan_url(
             scan_type="url",
         )
 
-        # 3. Save to Firestore (non-blocking)
+        # 3. Save to Firestore (non-blocking). Always uses the verified token's
+        # uid, never the client-supplied request.user_id — otherwise anyone
+        # could tag a scan as belonging to any other user's account.
         background_tasks.add_task(
             save_scan_result,
             report.model_dump(),
-            request.user_id,
+            uid,
             "url",
             url,
         )
@@ -74,8 +80,9 @@ async def scan_url(
 async def scan_image(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    user_id: Optional[str] = Form(None),
     x_gemini_key: Optional[str] = GeminiKeyHeader,
+    uid: Optional[str] = Depends(get_optional_uid),
+    _rl: None = Depends(rate_limit_scan),
 ):
     """Analyze an uploaded screenshot for phishing and scam indicators."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -85,6 +92,10 @@ async def scan_image(
         image_bytes = await file.read()
         if len(image_bytes) > 10 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="File too large. Maximum 10MB.")
+        try:
+            validate_image_bytes(image_bytes)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
         # 1. OCR + visual analysis
         image_data = await analyze_image(image_bytes)
@@ -100,7 +111,7 @@ async def scan_image(
         background_tasks.add_task(
             save_scan_result,
             report.model_dump(),
-            user_id,
+            uid,
             "image",
         )
 
@@ -116,8 +127,9 @@ async def scan_image(
 async def scan_qr(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    user_id: Optional[str] = Form(None),
     x_gemini_key: Optional[str] = GeminiKeyHeader,
+    uid: Optional[str] = Depends(get_optional_uid),
+    _rl: None = Depends(rate_limit_scan),
 ):
     """Decode a QR code and analyze the contained URL."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -125,6 +137,12 @@ async def scan_qr(
 
     try:
         image_bytes = await file.read()
+        if len(image_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large. Maximum 10MB.")
+        try:
+            validate_image_bytes(image_bytes)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
         # 1. Decode QR code
         qr_data = await process_qr(image_bytes)
@@ -150,13 +168,15 @@ async def scan_qr(
         background_tasks.add_task(
             save_scan_result,
             report.model_dump(),
-            user_id,
+            uid,
             "qr",
             decoded if qr_data["is_url"] else None,
         )
 
         return report
 
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -168,6 +188,8 @@ async def scan_social_url(
     request: SocialScanRequest,
     background_tasks: BackgroundTasks,
     x_gemini_key: Optional[str] = GeminiKeyHeader,
+    uid: Optional[str] = Depends(get_optional_uid),
+    _rl: None = Depends(rate_limit_scan),
 ):
     """Best-effort check of a Facebook profile/page URL for signs of being fake/cloned.
 
@@ -201,7 +223,7 @@ async def scan_social_url(
         background_tasks.add_task(
             save_scan_result,
             report.model_dump(),
-            request.user_id,
+            uid,
             "social",
             url,
         )
@@ -216,8 +238,9 @@ async def scan_social_url(
 async def scan_social_screenshot(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    user_id: Optional[str] = Form(None),
     x_gemini_key: Optional[str] = GeminiKeyHeader,
+    uid: Optional[str] = Depends(get_optional_uid),
+    _rl: None = Depends(rate_limit_scan),
 ):
     """Check a screenshot of a Facebook profile/page for signs of being fake/cloned.
 
@@ -232,6 +255,10 @@ async def scan_social_screenshot(
         image_bytes = await file.read()
         if len(image_bytes) > 10 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="File too large. Maximum 10MB.")
+        try:
+            validate_image_bytes(image_bytes)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
         text_lines = extract_text_from_image(image_bytes)
         extracted_text = "\n".join(text_lines)
@@ -257,7 +284,7 @@ alone wouldn't capture.
         background_tasks.add_task(
             save_scan_result,
             report.model_dump(),
-            user_id,
+            uid,
             "social",
         )
 

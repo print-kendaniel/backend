@@ -14,6 +14,24 @@ if shutil.which("tesseract") is None:
     if os.path.exists(_default_win_path):
         pytesseract.pytesseract.tesseract_cmd = _default_win_path
 
+# OpenCV's imdecode has no built-in decompression-bomb protection, unlike
+# PIL — a small, highly-compressed file can still declare huge pixel
+# dimensions and force a massive memory allocation on decode. Checking the
+# declared size via PIL first (cheap — header only, no full decode) bounds
+# the worst case before OpenCV ever touches the bytes.
+MAX_IMAGE_PIXELS = 25_000_000  # ~5000x5000, generous for screenshots
+
+
+def validate_image_bytes(image_bytes: bytes) -> None:
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as img:
+            width, height = img.size
+    except Exception:
+        raise ValueError("Invalid or unreadable image file")
+    if width * height > MAX_IMAGE_PIXELS:
+        raise ValueError(f"Image dimensions too large ({width}x{height})")
+
+
 PHISHING_PATTERNS = [
     "enter your password",
     "verify your account",

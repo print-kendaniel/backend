@@ -1,11 +1,10 @@
-import re
+import ipaddress
 import ssl
 import socket
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from datetime import datetime
 from typing import Optional, Tuple
-import httpx
 
 # Known safe brands + suspicious keyword patterns
 PHISHING_KEYWORDS = [
@@ -55,8 +54,33 @@ def extract_domain(url: str) -> str:
         return url.lower()
 
 
+def _is_safe_host(hostname: str) -> bool:
+    """Reject hostnames that resolve to private/internal/loopback addresses.
+
+    Without this, an attacker could submit a URL pointing at internal
+    infrastructure (cloud metadata services, localhost, the hosting
+    provider's internal network) and use this scanner as an SSRF proxy to
+    probe it, since this function makes a real outbound connection to
+    whatever hostname the user supplies.
+    """
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        return False
+    for info in infos:
+        try:
+            ip = ipaddress.ip_address(info[4][0])
+        except ValueError:
+            return False
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+            return False
+    return True
+
+
 def check_ssl(hostname: str) -> Tuple[bool, Optional[str]]:
     """Check if SSL is valid. Returns (is_valid, error_message)."""
+    if not _is_safe_host(hostname):
+        return False, "Refused to connect to a private or internal address"
     try:
         ctx = ssl.create_default_context()
         with ctx.wrap_socket(socket.create_connection((hostname, 443), timeout=5), server_hostname=hostname) as s:
@@ -134,16 +158,6 @@ def check_subdomain_abuse(domain: str) -> bool:
 
 def check_url_length(url: str) -> bool:
     return len(url) > 100
-
-
-def check_redirect_chains(url: str) -> int:
-    """Count HTTP redirects (max 5 hops)."""
-    try:
-        with httpx.Client(follow_redirects=True, timeout=5, max_redirects=5) as client:
-            response = client.get(url)
-            return len(response.history)
-    except Exception:
-        return 0
 
 
 async def analyze_url(url: str) -> dict:

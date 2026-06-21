@@ -76,12 +76,15 @@ export async function reportWebsite(payload: ReportWebsitePayload): Promise<{ me
   return data;
 }
 
-export async function getScanHistory(userId: string): Promise<ScanHistoryItem[]> {
-  const { data } = await api.get<ScanHistoryItem[]>(`/history?user_id=${userId}`);
+// The backend derives the user from the verified Authorization Bearer token
+// (attached by the interceptor above) — it no longer trusts a client-supplied
+// user_id, so these no longer take one either.
+export async function getScanHistory(): Promise<ScanHistoryItem[]> {
+  const { data } = await api.get<ScanHistoryItem[]>("/history");
   return data;
 }
 
-export async function getDashboardStats(userId: string): Promise<DashboardStats> {
-  const { data } = await api.get<DashboardStats>(`/dashboard-stats?user_id=${userId}`);
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const { data } = await api.get<DashboardStats>("/dashboard-stats");
   return data;
 }
