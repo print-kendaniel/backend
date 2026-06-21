@@ -52,7 +52,7 @@ async def root():
         "service": "TrustMeBro AI API",
         "version": "1.0.0",
         "status": "operational",
-        "docs": "/docs",
+        "docs": None if _is_production else "/docs",
     }
 
 
