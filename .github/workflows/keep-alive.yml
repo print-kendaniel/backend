@@ -1,0 +1,16 @@
+name: Keep backend awake
+
+# Render's free tier sleeps the backend after ~15 min idle, causing a 30s+
+# cold-start delay (and sometimes a client-side timeout) on the next real
+# request. Pinging well inside that window keeps it warm at no cost.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: curl -sf https://backend-ney4.onrender.com/health || true
