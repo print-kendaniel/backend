@@ -11,6 +11,6 @@ services:
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
       - key: ALLOWED_ORIGINS
-        value: https://frontend-steel-nine-yi8dnza11m.vercel.app,http://localhost:3000
+        value: https://trustmebroai.vercel.app,https://frontend-steel-nine-yi8dnza11m.vercel.app,http://localhost:3000
       - key: APP_ENV
         value: production
