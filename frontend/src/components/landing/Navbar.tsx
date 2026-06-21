@@ -76,13 +76,13 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="text-sm text-text-secondary hover:text-white transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
-                  href="/auth/signup"
+                  href="/signup"
                   className="flex items-center gap-1 text-sm font-medium text-black bg-primary px-4 py-2 rounded-lg hover:bg-primary/90 transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.3)]"
                 >
                   Get Started <ChevronRight className="w-3 h-3" />
@@ -128,10 +128,10 @@ export default function Navbar() {
                   </Link>
                 ) : (
                   <>
-                    <Link href="/auth/login" className="text-sm text-center text-text-secondary hover:text-white py-2">
+                    <Link href="/login" className="text-sm text-center text-text-secondary hover:text-white py-2">
                       Sign In
                     </Link>
-                    <Link href="/auth/signup" className="text-sm font-medium text-center text-black bg-primary px-4 py-2 rounded-lg">
+                    <Link href="/signup" className="text-sm font-medium text-center text-black bg-primary px-4 py-2 rounded-lg">
                       Get Started
                     </Link>
                   </>

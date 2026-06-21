@@ -23,7 +23,7 @@ export default function DashboardPage() {
   const [historyLoading, setHistoryLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) router.push("/auth/login");
+    if (!authLoading && !user) router.push("/login");
   }, [user, authLoading, router]);
 
   const fetchData = async () => {
