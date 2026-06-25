@@ -59,13 +59,13 @@ export default function PrivacyPolicyPage() {
 
             <h3 className="text-white font-semibold mt-5 mb-2">Chrome extension activity</h3>
             <p>
-              The extension can read the URL of your active tab so you can scan it on demand.
-              Auto-scanning visited sites is <strong>off by default</strong> — if you turn it on in
-              Settings, the extension will send each new domain you visit to our backend for a scan,
-              throttled to once per domain per 6 hours. You can turn this off at any time, and you can
-              mark specific sites as "Trusted" to exclude them entirely. Screenshot capture only
-              happens when you explicitly click "Scan Screenshot" or use the right-click context menu
-              — it is never automatic.
+              The extension only reads the URL of your active tab when you open the popup, and only
+              sends a URL, screenshot, or image for analysis when you explicitly trigger a scan —
+              clicking "Scan This URL" or "Scan Screenshot" in the popup, uploading a file, or using
+              the right-click context menu on a link or image. There is no background or automatic
+              scanning of pages you visit; the extension has no standing access to any page until you
+              ask it to check one. The on-page warning banner is only injected into the specific tab
+              you just scanned, immediately after that scan, and nowhere else.
             </p>
 
             <h3 className="text-white font-semibold mt-5 mb-2">Account data</h3>
@@ -77,10 +77,9 @@ export default function PrivacyPolicyPage() {
 
             <h3 className="text-white font-semibold mt-5 mb-2">Local storage (extension)</h3>
             <p>
-              Your scan history, trusted-site list, and settings (language, auto-scan, notifications)
-              are stored locally in your browser via the extension's storage and are not transmitted
-              anywhere except as part of a scan request you initiate (or that auto-scan initiates, if
-              you've enabled it).
+              Your scan history, trusted-site list, and settings (language, notifications) are stored
+              locally in your browser via the extension's storage and are not transmitted anywhere
+              except as part of a scan request you explicitly initiate.
             </p>
           </section>
 
